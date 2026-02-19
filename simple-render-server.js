@@ -36,52 +36,55 @@ const server = http.createServer((req, res) => {
           const requestData = JSON.parse(body);
           console.log('📨 TRPC Request:', requestData);
           
-          res.writeHead(200, { 'Content-Type': 'application/json' });
-          
           // Mock response for testing
+          let responseData;
+          
           if (req.url.includes('auth.login')) {
-            res.end(JSON.stringify({
-              result: {
-                data: {
-                  user: {
-                    id: '73581ecb-547c-4e2e-b357-5082a2d000ae',
-                    name: 'Mohamed Nazir',
-                    email: 'mohamed_nazir@example.com',
-                    district: 'Madurai'
-                  },
-                  token: 'mock-token-123'
-                }
-              }
-            }));
+            responseData = {
+              user: {
+                id: '73581ecb-547c-4e2e-b357-5082a2d000ae',
+                name: 'Mohamed Nazir',
+                email: 'mohamed_nazir@example.com',
+                district: 'Madurai'
+              },
+              token: 'mock-token-123'
+            };
           } else if (req.url.includes('orders.getTodayOrders')) {
-            res.end(JSON.stringify({
-              result: {
-                data: []
-              }
-            }));
+            responseData = [];
           } else if (req.url.includes('orders.getByUser')) {
-            res.end(JSON.stringify({
-              result: {
-                data: []
-              }
-            }));
+            responseData = [];
           } else if (req.url.includes('orders.getMonthlyReport')) {
-            res.end(JSON.stringify({
-              result: {
-                data: {
-                  totalSales: 0,
-                  totalOrders: 0,
-                  dailySales: []
-                }
-              }
-            }));
+            responseData = {
+              totalSales: 0,
+              totalOrders: 0,
+              dailySales: []
+            };
+          } else if (req.url.includes('orders.create')) {
+            responseData = {
+              id: 'order-' + Date.now(),
+              userId: requestData.input?.userId || '73581ecb-547c-4e2e-b357-5082a2d000ae',
+              items: requestData.input?.items || [],
+              total: requestData.input?.total || 0,
+              paymentType: requestData.input?.paymentType || 'cash',
+              customerName: requestData.input?.customerName || 'Walk-in Customer',
+              createdAt: new Date().toISOString()
+            };
           } else {
-            res.end(JSON.stringify({
-              result: {
-                data: { message: 'TRPC endpoint working' }
-              }
-            }));
+            responseData = { message: 'TRPC endpoint working' };
           }
+          
+          // Send proper TRPC response
+          res.writeHead(200, { 
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+          });
+          res.end(JSON.stringify({
+            result: {
+              data: responseData
+            }
+          }));
         } catch (parseError) {
           console.error('❌ Parse Error:', parseError);
           res.writeHead(400, { 'Content-Type': 'application/json' });
