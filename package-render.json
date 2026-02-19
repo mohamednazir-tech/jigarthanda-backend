@@ -1,0 +1,19 @@
+{
+  "name": "jigarthanda-backend",
+  "version": "1.0.0",
+  "description": "Jigarthanda POS Backend for Render",
+  "main": "render-server.js",
+  "scripts": {
+    "start": "node render-server.js",
+    "dev": "node render-server.js"
+  },
+  "dependencies": {
+    "@trpc/server": "^10.0.0",
+    "@trpc/server-adapters": "^10.0.0",
+    "superjson": "^2.2.0",
+    "zod": "^3.22.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

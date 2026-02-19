@@ -1,0 +1,22 @@
+services:
+  # Jigarthanda Backend Service
+  - type: web
+    name: jigarthanda-backend
+    env: node
+    plan: free
+    buildCommand: "npm install"
+    startCommand: "node render-server.js"
+    envVars:
+      - key: NODE_VERSION
+        value: 18
+    healthCheckPath: /health
+    autoDeploy: false
+    region: oregon
+    
+  # PostgreSQL Database Service
+  - type: pserv
+    name: jigarthanda-db
+    plan: free
+    region: oregon
+    databaseName: jigarthanda_db
+    user: jigarthanda_user

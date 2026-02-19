@@ -1,0 +1,66 @@
+const http = require('http');
+
+console.log('🚀 Starting Simple Jigarthanda Backend Server...');
+
+// Simple HTTP server for testing
+const server = http.createServer((req, res) => {
+  // Enable CORS
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  
+  // Handle preflight requests
+  if (req.method === 'OPTIONS') {
+    res.writeHead(200);
+    res.end();
+    return;
+  }
+  
+  // Log requests
+  console.log(`📱 ${req.method} ${req.url}`);
+  
+  // Handle TRPC requests
+  if (req.url.startsWith('/trpc')) {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    
+    // Mock response for testing
+    if (req.url.includes('auth.login')) {
+      res.end(JSON.stringify({
+        result: {
+          data: {
+            user: {
+              id: '1',
+              name: 'Mohamed Nazir',
+              email: 'mohamed_nazir@example.com'
+            },
+            token: 'mock-token-123'
+          }
+        }
+      }));
+    } else {
+      res.end(JSON.stringify({
+        result: {
+          data: { message: 'TRPC endpoint working' }
+        }
+      }));
+    }
+  } else {
+    // Root endpoint
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({
+      message: '🍹 Jigarthanda Backend Server',
+      status: 'Running',
+      time: new Date().toISOString(),
+      endpoints: ['/trpc/auth.login', '/trpc/orders.getTodayOrders']
+    }));
+  }
+});
+
+server.listen(3000, '0.0.0.0', () => {
+  console.log('🎉 Backend server running on http://0.0.0.0:3000');
+  console.log('📱 Mobile app can connect to: http://10.171.132.69:3000');
+  console.log('🍹 Jigarthanda POS Backend Ready!');
+  console.log('🧪 Test endpoints:');
+  console.log('   - http://10.171.132.69:3000');
+  console.log('   - http://10.171.132.69:3000/trpc/auth.login');
+});
