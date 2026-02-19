@@ -24,35 +24,73 @@ const server = http.createServer((req, res) => {
   try {
     // Handle TRPC requests
     if (req.url.startsWith('/trpc')) {
-      res.writeHead(200, { 'Content-Type': 'application/json' });
+      let body = '';
       
-      // Mock response for testing
-      if (req.url.includes('auth.login')) {
-        res.end(JSON.stringify({
-          result: {
-            data: {
-              user: {
-                id: '1',
-                name: 'Mohamed Nazir',
-                email: 'mohamed_nazir@example.com'
-              },
-              token: 'mock-token-123'
-            }
+      // Collect request body
+      req.on('data', chunk => {
+        body += chunk.toString();
+      });
+      
+      req.on('end', () => {
+        try {
+          const requestData = JSON.parse(body);
+          console.log('📨 TRPC Request:', requestData);
+          
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          
+          // Mock response for testing
+          if (req.url.includes('auth.login')) {
+            res.end(JSON.stringify({
+              result: {
+                data: {
+                  user: {
+                    id: '73581ecb-547c-4e2e-b357-5082a2d000ae',
+                    name: 'Mohamed Nazir',
+                    email: 'mohamed_nazir@example.com',
+                    district: 'Madurai'
+                  },
+                  token: 'mock-token-123'
+                }
+              }
+            }));
+          } else if (req.url.includes('orders.getTodayOrders')) {
+            res.end(JSON.stringify({
+              result: {
+                data: []
+              }
+            }));
+          } else if (req.url.includes('orders.getByUser')) {
+            res.end(JSON.stringify({
+              result: {
+                data: []
+              }
+            }));
+          } else if (req.url.includes('orders.getMonthlyReport')) {
+            res.end(JSON.stringify({
+              result: {
+                data: {
+                  totalSales: 0,
+                  totalOrders: 0,
+                  dailySales: []
+                }
+              }
+            }));
+          } else {
+            res.end(JSON.stringify({
+              result: {
+                data: { message: 'TRPC endpoint working' }
+              }
+            }));
           }
-        }));
-      } else if (req.url.includes('orders.getTodayOrders')) {
-        res.end(JSON.stringify({
-          result: {
-            data: []
-          }
-        }));
-      } else {
-        res.end(JSON.stringify({
-          result: {
-            data: { message: 'TRPC endpoint working' }
-          }
-        }));
-      }
+        } catch (parseError) {
+          console.error('❌ Parse Error:', parseError);
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({
+            error: 'Invalid JSON',
+            message: parseError.message
+          }));
+        }
+      });
     } else if (req.url === '/health') {
       // Health check endpoint
       res.writeHead(200, { 'Content-Type': 'application/json' });
