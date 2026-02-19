@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "dev": "ts-node index.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node simple-render-server.js",
+    "dev": "node simple-render-server.js"
   },
   "keywords": [],
   "author": "",
