@@ -16,6 +16,77 @@ const pool = new Pool({
   }
 });
 
+// Auto-setup database on server start
+async function setupDatabase() {
+  console.log('🗄️ Setting up database...');
+  
+  try {
+    // Create users table
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS users (
+        id VARCHAR(255) PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        email VARCHAR(255) UNIQUE NOT NULL,
+        district VARCHAR(255) NOT NULL,
+        password_hash VARCHAR(255) NOT NULL,
+        created_at TIMESTAMP DEFAULT NOW(),
+        updated_at TIMESTAMP DEFAULT NOW()
+      )
+    `);
+    
+    // Create orders table
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS orders (
+        id SERIAL PRIMARY KEY,
+        user_id VARCHAR(255) REFERENCES users(id) ON DELETE CASCADE,
+        items JSONB NOT NULL,
+        total DECIMAL(10,2) NOT NULL,
+        payment_type VARCHAR(50) NOT NULL,
+        customer_name VARCHAR(255) NOT NULL,
+        created_at TIMESTAMP DEFAULT NOW(),
+        updated_at TIMESTAMP DEFAULT NOW()
+      )
+    `);
+    
+    // Create indexes for better performance
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_orders_user_id ON orders(user_id)
+    `);
+    
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_orders_created_at ON orders(created_at)
+    `);
+    
+    // Insert sample user if not exists
+    const userResult = await pool.query(
+      'SELECT id FROM users WHERE id = $1',
+      ['73581ecb-547c-4e2e-b357-5082a2d000ae']
+    );
+    
+    if (userResult.rows.length === 0) {
+      await pool.query(
+        'INSERT INTO users (id, name, email, district, password_hash, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, NOW(), NOW())',
+        [
+          '73581ecb-547c-4e2e-b357-5082a2d000ae',
+          'Mohamed Nazir',
+          'mohamed_nazir@example.com',
+          'Madurai',
+          'mock-password-hash',
+          NOW(),
+          NOW()
+        ]
+      );
+      console.log('👤 Sample user created');
+    }
+    
+    console.log('✅ Database setup complete');
+    
+  } catch (error) {
+    console.error('❌ Database setup error:', error);
+    // Don't throw error, just log it and continue
+  }
+}
+
 // Simple HTTP server for testing
 const server = http.createServer((req, res) => {
   console.log(`📱 ${req.method} ${req.url}`);
@@ -171,14 +242,19 @@ const server = http.createServer((req, res) => {
   }
 });
 
-server.listen(PORT, '0.0.0.0', () => {
+server.listen(PORT, '0.0.0.0', async () => {
   console.log('🎉 Backend server running on port:', PORT);
   console.log('🌐 Render deployment ready');
-  console.log('📱 Mobile app can connect to:', process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`);
+  console.log('📱 Mobile app can connect to:', API_URL);
   console.log('🍹 Jigarthanda POS Backend Ready!');
   console.log('🧪 Test endpoints:');
-  console.log(`   - Health: ${process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`}/health`);
-  console.log(`   - TRPC: ${process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`}/trpc/auth.login`);
+  console.log(`   - Health: ${API_URL}/health`);
+  console.log(`   - TRPC: ${API_URL}/trpc/auth.login`);
+  
+  // Setup database automatically
+  await setupDatabase();
+  
+  console.log('🎉 Server startup complete');
 });
 
 // Handle server errors
