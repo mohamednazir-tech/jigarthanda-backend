@@ -1,9 +1,20 @@
 const http = require('http');
+const { Pool } = require('pg');
 
 console.log('🚀 Starting Jigarthanda Backend for Render...');
 
 // Configure for Render
 const PORT = process.env.PORT || 3000;
+const DATABASE_URL = process.env.DATABASE_URL || 'postgresql://jigarthanda_user:OtVnd92l0RpbBE5AO9qe090pBcDqbrb5@dpg-d6bd1qgboq4c73fiiom0-a/jigarthanda_db';
+const API_URL = process.env.RENDER_EXTERNAL_URL || 'https://jigarthanda-backend.onrender.com';
+
+// PostgreSQL connection
+const pool = new Pool({
+  connectionString: DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false
+  }
+});
 
 // Simple HTTP server for testing
 const server = http.createServer((req, res) => {
@@ -31,7 +42,7 @@ const server = http.createServer((req, res) => {
         body += chunk.toString();
       });
       
-      req.on('end', () => {
+      req.on('end', async () => {
         try {
           const requestData = JSON.parse(body);
           console.log('📨 TRPC Request:', requestData);
@@ -50,25 +61,59 @@ const server = http.createServer((req, res) => {
               token: 'mock-token-123'
             };
           } else if (req.url.includes('orders.getTodayOrders')) {
-            responseData = [];
+            // Get today's orders from database
+            const today = new Date();
+            const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+            const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
+            
+            const result = await pool.query(
+              'SELECT * FROM orders WHERE created_at >= $1 AND created_at < $2 AND user_id = $3 ORDER BY created_at DESC',
+              [startOfDay, endOfDay, requestData.input?.userId || '73581ecb-547c-4e2e-b357-5082a2d000ae']
+            );
+            
+            responseData = result.rows;
           } else if (req.url.includes('orders.getByUser')) {
-            responseData = [];
+            // Get all orders for user from database
+            const result = await pool.query(
+              'SELECT * FROM orders WHERE user_id = $1 ORDER BY created_at DESC',
+              [requestData.input?.userId || '73581ecb-547c-4e2e-b357-5082a2d000ae']
+            );
+            
+            responseData = result.rows;
           } else if (req.url.includes('orders.getMonthlyReport')) {
+            // Get monthly report from database
+            const result = await pool.query(
+              'SELECT DATE(created_at) as date, COUNT(*) as orders, COALESCE(SUM(total), 0) as sales FROM orders WHERE user_id = $1 AND DATE(created_at) >= DATE_TRUNC(\'month\', CURRENT_DATE) ORDER BY DATE(created_at) DESC',
+              [requestData.input?.userId || '73581ecb-547c-4e2e-b357-5082a2d000ae']
+            );
+            
+            const totalResult = await pool.query(
+              'SELECT COUNT(*) as total_orders, COALESCE(SUM(total), 0) as total_sales FROM orders WHERE user_id = $1 AND DATE(created_at) >= DATE_TRUNC(\'month\', CURRENT_DATE)',
+              [requestData.input?.userId || '73581ecb-547c-4e2e-b357-5082a2d000ae']
+            );
+            
             responseData = {
-              totalSales: 0,
-              totalOrders: 0,
-              dailySales: []
+              totalSales: parseFloat(totalResult.rows[0].total_sales) || 0,
+              totalOrders: parseInt(totalResult.rows[0].total_orders) || 0,
+              dailySales: result.rows
             };
           } else if (req.url.includes('orders.create')) {
-            responseData = {
-              id: 'order-' + Date.now(),
-              userId: requestData.input?.userId || '73581ecb-547c-4e2e-b357-5082a2d000ae',
-              items: requestData.input?.items || [],
-              total: requestData.input?.total || 0,
-              paymentType: requestData.input?.paymentType || 'cash',
-              customerName: requestData.input?.customerName || 'Walk-in Customer',
-              createdAt: new Date().toISOString()
-            };
+            // Create order in database
+            const { items, total, paymentType, customerName } = requestData.input;
+            
+            const orderResult = await pool.query(
+              'INSERT INTO orders (user_id, items, total, payment_type, customer_name, created_at) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
+              [
+                requestData.input?.userId || '73581ecb-547c-4e2e-b357-5082a2d000ae',
+                JSON.stringify(items),
+                total,
+                paymentType,
+                customerName || 'Walk-in Customer',
+                new Date()
+              ]
+            );
+            
+            responseData = orderResult.rows[0];
           } else {
             responseData = { message: 'TRPC endpoint working' };
           }
@@ -102,7 +147,9 @@ const server = http.createServer((req, res) => {
         service: 'jigarthanda-backend',
         timestamp: new Date().toISOString(),
         uptime: process.uptime(),
-        database: 'connected'
+        database: 'connected',
+        database_url: DATABASE_URL,
+        api_url: API_URL
       }));
     } else {
       // Root endpoint
