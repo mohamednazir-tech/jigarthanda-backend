@@ -131,6 +131,27 @@ const server = http.createServer((req, res) => {
               },
               token: 'mock-token-123'
             };
+          } else if (req.url.includes('auth.signup')) {
+            // Handle signup - create new user
+            const { name, district, password } = requestData.input;
+            
+            // Check if user already exists (mock check)
+            if (name === 'Mohamed Nazir') {
+              throw new Error('User already exists');
+            }
+            
+            // In a real app, you would hash the password and save to database
+            const newUserId = 'user-' + Date.now();
+            
+            responseData = {
+              user: {
+                id: newUserId,
+                name: name,
+                email: `${name.toLowerCase().replace(/\s+/g, '_')}@example.com`,
+                district: district
+              },
+              token: 'mock-token-' + newUserId
+            };
           } else if (req.url.includes('orders.getTodayOrders')) {
             // Get today's orders from database
             const today = new Date();
