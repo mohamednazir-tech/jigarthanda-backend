@@ -16,12 +16,22 @@ const server = http.createServer((req, res) => {
     return;
   }
   
-  // Log requests
-  console.log(`📱 ${req.method} ${req.url}`);
+  // Collect request body for POST requests
+  let body = '';
+  req.on('data', chunk => {
+    body += chunk.toString();
+  });
   
-  // Handle TRPC requests
-  if (req.url.startsWith('/trpc')) {
-    res.writeHead(200, { 'Content-Type': 'application/json' });
+  req.on('end', () => {
+    // Log requests
+    console.log(`📱 ${req.method} ${req.url}`);
+    if (body) {
+      console.log('📦 Request body:', body);
+    }
+    
+    // Handle TRPC requests
+    if (req.url.startsWith('/trpc')) {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
     
     // Mock response for testing
     if (req.url.includes('auth.login')) {
@@ -73,6 +83,7 @@ const server = http.createServer((req, res) => {
       endpoints: ['/trpc/auth.login', '/trpc/orders.getTodayOrders']
     }));
   }
+  });
 });
 
 server.listen(3000, '0.0.0.0', () => {
