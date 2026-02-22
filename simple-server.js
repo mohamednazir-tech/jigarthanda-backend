@@ -28,19 +28,38 @@ const server = http.createServer((req, res) => {
       res.end(JSON.stringify({
         result: {
           data: {
-            user: {
-              id: '1',
-              name: 'Mohamed Nazir',
-              email: 'mohamed_nazir@example.com'
-            },
-            token: 'mock-token-123'
+            json: {
+              user: {
+                id: '1',
+                name: 'Mohamed Nazir',
+                email: 'mohamed_nazir@example.com'
+              },
+              token: 'mock-token-123'
+            }
+          }
+        }
+      }));
+    } else if (req.url.includes('auth.signup')) {
+      res.end(JSON.stringify({
+        result: {
+          data: {
+            json: {
+              user: {
+                id: '2',
+                name: 'New User',
+                email: 'new_user@example.com'
+              },
+              token: 'mock-token-456'
+            }
           }
         }
       }));
     } else {
       res.end(JSON.stringify({
         result: {
-          data: { message: 'TRPC endpoint working' }
+          data: {
+            json: { message: 'TRPC endpoint working' }
+          }
         }
       }));
     }
@@ -57,10 +76,10 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(3000, '0.0.0.0', () => {
-  console.log('🎉 Backend server running on http://0.0.0.0:3000');
-  console.log('📱 Mobile app can connect to: http://10.171.132.69:3000');
+  console.log('🎉 Backend server running on https://jigarthanda-backend.onrender.com');
+  console.log('📱 Mobile app can connect to: https://jigarthanda-backend.onrender.com/trpc');
   console.log('🍹 Jigarthanda POS Backend Ready!');
   console.log('🧪 Test endpoints:');
-  console.log('   - http://10.171.132.69:3000');
-  console.log('   - http://10.171.132.69:3000/trpc/auth.login');
+  console.log('   - https://jigarthanda-backend.onrender.com/trpc/auth.login');
+  console.log('   - https://jigarthanda-backend.onrender.com/trpc/orders.getTodayOrders');
 });
