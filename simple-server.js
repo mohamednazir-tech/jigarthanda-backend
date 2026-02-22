@@ -57,10 +57,10 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(3000, '0.0.0.0', () => {
-  console.log('🎉 Backend server running on http://0.0.0.0:3000');
-  console.log('📱 Mobile app can connect to: http://10.171.132.69:3000');
+  console.log('🎉 Backend server running on https://jigarthanda-backend.onrender.com');
+  console.log('📱 Mobile app can connect to: https://jigarthanda-backend.onrender.com/trpc');
   console.log('🍹 Jigarthanda POS Backend Ready!');
   console.log('🧪 Test endpoints:');
-  console.log('   - http://10.171.132.69:3000');
-  console.log('   - http://10.171.132.69:3000/trpc/auth.login');
+  console.log('   - https://jigarthanda-backend.onrender.com/trpc/auth.login');
+  console.log('   - https://jigarthanda-backend.onrender.com/trpc/orders.getTodayOrders');
 });
