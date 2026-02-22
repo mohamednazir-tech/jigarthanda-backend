@@ -11,5 +11,5 @@ const server = createHTTPServer({
 });
 
 server.listen(3000, () => {
-  console.log("Server running on http://0.0.0.0:3000");
+  console.log("Server running on https://jigarthanda-backend.onrender.com");
 });
