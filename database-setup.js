@@ -18,7 +18,7 @@ async function setupDatabase() {
       CREATE TABLE IF NOT EXISTS users (
         id VARCHAR(255) PRIMARY KEY,
         name VARCHAR(255) NOT NULL,
-        email VARCHAR(255) UNIQUE NOT NULL,
+        username VARCHAR(255) UNIQUE NOT NULL,
         district VARCHAR(255) NOT NULL,
         password_hash VARCHAR(255) NOT NULL,
         created_at TIMESTAMP DEFAULT NOW(),
@@ -57,11 +57,11 @@ async function setupDatabase() {
     
     if (userResult.rows.length === 0) {
       await pool.query(
-        'INSERT INTO users (id, name, email, district, password_hash, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, NOW(), NOW())',
+        'INSERT INTO users (id, name, username, district, password_hash, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, NOW(), NOW())',
         [
           '73581ecb-547c-4e2e-b357-5082a2d000ae',
           'Mohamed Nazir',
-          'mohamed_nazir@example.com',
+          'mohamednazir',
           'Madurai',
           'mock-password-hash',
           NOW(),
