@@ -10,7 +10,7 @@ services:
       - key: NODE_VERSION
         value: 18
     healthCheckPath: /health
-    autoDeploy: false
+    autoDeploy: true
     region: oregon
     
   # PostgreSQL Database Service
