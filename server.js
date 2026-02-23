@@ -14,7 +14,7 @@ const server = createHTTPServer({
 });
 
 server.listen(3000, '0.0.0.0', () => {
-  console.log('🎉 Backend server running on http://0.0.0.0:3000');
-  console.log('📱 Mobile app can connect to: http://10.171.132.69:3000');
+  console.log('🎉 Backend server running on https://jigarthanda-backend.onrender.com');
+  console.log('📱 Mobile app can connect to: https://jigarthanda-backend.onrender.com/trpc');
   console.log('🍹 Jigarthanda POS Backend Ready!');
 });
