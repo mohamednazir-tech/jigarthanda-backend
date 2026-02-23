@@ -42,7 +42,8 @@ const server = http.createServer((req, res) => {
               user: {
                 id: '1',
                 name: 'Mohamed Nazir',
-                email: 'mohamed_nazir@example.com'
+                username: 'mohamednazir',
+                district: 'Madurai'
               },
               token: 'mock-token-123'
             }
@@ -57,7 +58,8 @@ const server = http.createServer((req, res) => {
               user: {
                 id: '2',
                 name: 'New User',
-                email: 'new_user@example.com'
+                username: 'newuser',
+                district: 'Chennai'
               },
               token: 'mock-token-456'
             }
