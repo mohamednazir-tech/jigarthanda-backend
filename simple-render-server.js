@@ -126,7 +126,7 @@ const server = http.createServer((req, res) => {
               user: {
                 id: '73581ecb-547c-4e2e-b357-5082a2d000ae',
                 name: 'Mohamed Nazir',
-                email: 'mohamed_nazir@example.com',
+                username: 'mohamednazir',
                 district: 'Madurai'
               },
               token: 'mock-token-123'
@@ -147,7 +147,7 @@ const server = http.createServer((req, res) => {
               user: {
                 id: newUserId,
                 name: name,
-                email: `${name.toLowerCase().replace(/\s+/g, '_')}@example.com`,
+                username: name.toLowerCase().replace(/\s+/g, '_'),
                 district: district
               },
               token: 'mock-token-' + newUserId
